@@ -1,0 +1,44 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+venv/
+.venv/
+
+# Database (local state)
+*.db
+*.db-shm
+*.db-wal
+*.db-journal
+
+# Environment
+.env
+
+# Output / generated content
+output/
+
+# YouTube credentials (sensitive)
+youtube/
+
+# Local agent state
+agent/active_project.json
+
+# Generated AI tool configs (run: python setup.py)
+.claude/commands/fk:*
+.gemini/commands/
+AGENTS.md
+GEMINI.md
+.fk-setup.json
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
