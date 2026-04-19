@@ -24,6 +24,31 @@ Filter to entities that do NOT yet have `media_id` (UUID format `xxxxxxxx-xxxx-x
 
 **GENERATE vs REGENERATE:** `GENERATE_CHARACTER_IMAGE` skips if `media_id` already exists. Use `REGENERATE_CHARACTER_IMAGE` to force a fresh generation (clears existing image first).
 
+## Step 2b: Audit image_prompt quality (MANDATORY before generating)
+
+**Do NOT skip this step.** A bad ref image = character drift across ALL scenes. Fix before generating — regenerating costs double.
+
+For each entity, review `image_prompt`. It must satisfy ALL of the following:
+
+| Check | Required | Fix if missing |
+|-------|----------|---------------|
+| Full body or bust portrait | Full body preferred for characters | Prepend `"Full body portrait,"` |
+| Face fully visible, front-facing | No side/back view (unless famous person — see `fk:create-project.md`) | Add `"facing camera directly, face fully visible"` |
+| Neutral plain background | No furniture, environment, other characters | Add `"neutral plain grey studio background, no props"` |
+| Even studio lighting | No dramatic shadows, no backlight | Add `"soft even studio lighting, no harsh shadows"` |
+| Single outfit, single pose | No multi-panel grids, no multiple angles | Rewrite if composite |
+| No blur / sharp | Crisp detail | Add `"sharp, crisp detail, high resolution"` |
+
+**Auto-fix pattern** — if `image_prompt` fails any check, PATCH it before submitting:
+
+```bash
+curl -X PATCH http://127.0.0.1:8100/api/characters/<CID> \
+  -H "Content-Type: application/json" \
+  -d '{"image_prompt": "Full body portrait, facing camera directly. [existing description]. Neutral plain grey studio background, no props, no other characters. Soft even studio lighting, no harsh shadows. Sharp, crisp, high resolution single reference image."}'
+```
+
+Only PATCH entities that fail the checks. Skip entities that already pass.
+
 ## Step 3: Submit ALL requests at once
 
 The server handles throttling automatically (max 5 concurrent, 10s cooldown). Submit everything in one batch call:

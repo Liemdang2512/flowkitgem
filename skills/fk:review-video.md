@@ -123,8 +123,18 @@ Then run `/fk:gen-videos <PID> <VID>` after image is complete.
 Note `usable_segments` time ranges for manual editing. Use `/fk:concat` and trim in post.
 
 ### Character drift (low `character_consistency`)
-- Verify all entity ref images have `media_id` (UUID format)
-- Use `EDIT_IMAGE` to re-anchor character appearance:
+
+Diagnose in order — fix at root cause before regenerating:
+
+1. **Bad ref image (most common root cause)** — view ref URL from `GET /api/projects/<PID>/characters`. If ref shows character at angle, in shadow, too far/small, or cluttered background → PATCH `image_prompt` + run `REGENERATE_CHARACTER_IMAGE` first. Then regen scene image and video.
+
+2. **`character_names` incomplete** — check scene's `character_names` includes ALL visible entities. Missing entry = ref not sent as imageInput = AI invents appearance.
+
+3. **Video prompt too complex** — long prompt or complex camera movement forces model to regenerate frames from scratch. Simplify: cut prompt to <120 words, replace complex movement with `locked-off static` or `slow dolly in`.
+
+4. **Missing consistency lock in video_prompt** — PATCH `video_prompt` to add to SUBJECT block: `"Character maintains consistent appearance throughout. Same face, same outfit, no morphing."` and to NEGATIVE: `"character drift, morphing face, changing appearance, extra limbs"`.
+
+5. **Re-anchor via EDIT_IMAGE** — after fixing ref and prompt, use EDIT_IMAGE to regenerate the scene image with the improved ref, then regen video:
   ```bash
   curl -X POST http://127.0.0.1:8100/api/requests \
     -H "Content-Type: application/json" \
@@ -205,9 +215,9 @@ MINOR errors → acceptable for most use cases. Polish optional.
 
 | Issue | Fix |
 |-------|-----|
-| Character drift | Simpler prompts, add "steady camera, minimal movement" |
-| Breed swap | Use high color contrast between similar characters |
-| Character count | ONE dominant character, others in background |
+| Character drift | 1) Check ref image quality (full face, neutral bg, even lighting) — regen ref if bad. 2) Add to SUBJECT block: `"Character maintains consistent appearance throughout. Same face, same outfit, no morphing."` 3) Add to NEGATIVE: `"character drift, morphing face, changing appearance"` 4) Simplify camera movement: prefer `locked-off static` or `slow dolly in`. 5) Keep prompt under 120 words — long prompts increase drift probability. |
+| Breed swap | Use high color contrast between similar characters. Add species-specific anatomy to NEGATIVE: `"wrong species, human features on animal"` |
+| Character count | ONE dominant character per shot, others blurred in background. For multi-character dialogue, use over-the-shoulder shots — only 1 face visible at a time. |
 | Reverse motion | Regen video (luck-based, different seed) |
 | Brand logos | Add "no brand logos, no text" to prompt |
 | Camera drift | Add "static camera" or "locked-off shot" to video_prompt |

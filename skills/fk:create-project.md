@@ -3,7 +3,35 @@ Create a new Google Flow video project. Ask the user for:
 
 1. **Project name** and **story** (brief plot summary)
 2. **Material** — the visual style for all images. Choose one of the 6 built-in styles or a custom material. Run `GET /api/materials` to show available options. Built-ins: `realistic`, `3d_pixar`, `anime`, `stop_motion`, `minecraft`, `oil_painting`. **Required.**
-3. **Characters** — name + visual description of their **base default look in ONE outfit only**. No scene-specific variants (e.g. "glamorous in studio, sporty in gym"). The reference image must be a single clean image, not a multi-panel grid. Different outfits per scene come from the scene prompts, not the character description.
+3. **Characters** — name + visual description using the **Ref Image Formula** below. The reference image must be a single clean image, not a multi-panel grid.
+
+### Ref Image Formula (MANDATORY for every character)
+
+The `description` field auto-generates the `image_prompt` for the ref image. A bad description = bad ref = video drift across all scenes. Follow this formula exactly:
+
+```
+[POSE] Full body portrait, facing camera directly, neutral relaxed stance, arms at sides.
+[FACE] Face fully visible, front-facing, clear features, [age range], [ethnicity if relevant].
+[HAIR] [Color], [length], [style]. Consistent with character identity.
+[CLOTHING] [Specific outfit — ONE outfit only]. [Colors]. [Textures/materials].
+[BUILD] [Height/build]: tall/medium/short, slim/athletic/stocky.
+[BACKGROUND] Neutral plain grey studio background, no props, no other characters.
+[LIGHTING] Soft even studio lighting, no harsh shadows, character fully lit.
+[QUALITY] Single reference sheet. Clean, sharp, no blur.
+```
+
+**What makes refs fail (causes video drift):**
+- Face partially hidden, angled, or too small in frame → AI invents face in motion
+- Complex background / other characters → ref noise → wrong visual anchor
+- Dark/dramatic lighting → shadows hide features → model drifts
+- Vague description like "tall hero in armor" → AI fills gaps inconsistently
+- Different outfits described together → model picks randomly per scene
+
+**Good vs Bad:**
+| Bad | Good |
+|-----|------|
+| `"Luna is a white cat with orange spacesuit"` | `"Full body portrait. White short-haired cat, facing camera, green eyes, small pink nose. Wearing orange spacesuit with silver helmet tucked under left arm. Slim feline build. Neutral grey background, soft studio lighting."` |
+| `"Soldier in combat gear"` | `"Full body portrait, facing camera, neutral stance. Male soldier, 30s, strong build. Dark green combat uniform, black tactical vest, brown boots, no helmet. Close-cropped dark hair, strong jawline. Neutral grey background, soft even lighting."` |
 4. **Locations** — name + visual description of key places
 5. **Visual assets** — name + visual description of key props/objects
 6. **Number of scenes** and **orientation** (VERTICAL or HORIZONTAL)
@@ -279,6 +307,9 @@ Note: `transition_prompt` only needed for chain scenes that have a child scene. 
 
 **Anti-patterns:**
 - **NEVER describe character appearance** (eyes, hair, clothing, outfit) in `prompt` or `video_prompt` — reference images handle visual consistency via `imageInputs`. Write ACTION only.
+- **ONE dominant character per scene** — multiple characters in the same frame = high drift risk. When you need 2+ characters, place secondaries in the background (blurred/distant). One close-up character per shot.
+- **Simple camera movement = more consistency** — complex movements (whip pan, fast dolly + tilt simultaneously) force the model to regenerate more frames from scratch → drift. For character-heavy scenes, prefer `locked-off static`, `slow dolly in`, or `gimbal glide`.
+- **Verify `character_names` is complete** — every entity that appears in the scene must be listed. Missing = no ref sent as imageInput = AI invents the appearance from scratch.
 - Never use single-word or atmosphere-only prompts: `"epic"`, `"dramatic"`, `"cinematic"`
 - Always include a camera/composition cue at the end
 - All `prompt`, `video_prompt`, and `image_prompt` MUST be in English regardless of project language — EXCEPT dialogue text which stays in the project's language
@@ -381,6 +412,8 @@ Action-focused subject description.
 For realistic material, append: "Photorealistic, 4K, natural skin texture,
 subtle micro-expressions, no AI smoothing filter."
 DO NOT describe character appearance (handled by ref images via imageInputs).
+ALWAYS append consistency lock: "Character maintains consistent appearance throughout.
+Same face, same outfit, no morphing."
 
 [BLOCK 4 - ACTION]
 Specific actions the character performs. Include body language:
@@ -398,7 +431,8 @@ Audio: [ambient sounds].
 SFX: [specific sound effects].
 
 [BLOCK 7 - NEGATIVE PROMPT] (MANDATORY — never omit)
-Negative: subtitles, watermark, text on screen, blurry faces, distorted hands.
+Negative: subtitles, watermark, text on screen, blurry faces, distorted hands,
+character drift, morphing face, changing appearance, extra limbs, breed swap.
 For realistic material: add "cartoon, CGI, plastic skin, over-smoothed, AI look"
 For VERTICAL: add "16:9 landscape, horizontal composition, wide landscape shot, pillarboxed, letterboxed"
 For non-English projects: add "English dialogue"
