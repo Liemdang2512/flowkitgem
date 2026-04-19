@@ -183,6 +183,13 @@ Veo 3 generates all audio from text. Three layers, each with its own label at th
 Character says: "We need to leave now." (no subtitles)
 ```
 
+**Dialogue scene camera rule (CRITICAL for realistic material):**
+When a character is speaking, the model must simultaneously sync lip movement + render realistic face + handle camera motion — this overloads the model and causes face drift. Rule:
+- **Camera: `locked-off static` or `very slow dolly in` ONLY** during dialogue
+- **Never use** `handheld`, `tracking shot`, `pan`, `crane`, or `arc shot` when character is speaking
+- **Prefer `medium close-up` or `close-up`** — large face in frame = less hallucination, better lip sync
+- If camera movement is needed, place it BEFORE or AFTER the dialogue line, not during
+
 **Dialogue rules:**
 - Use `:` format to avoid subtitles: `Character says: dialogue text`
 - Or use `""` but always add `(no subtitles)`

@@ -412,8 +412,7 @@ Action-focused subject description.
 For realistic material, append: "Photorealistic, 4K, natural skin texture,
 subtle micro-expressions, no AI smoothing filter."
 DO NOT describe character appearance (handled by ref images via imageInputs).
-ALWAYS append consistency lock: "Character maintains consistent appearance throughout.
-Same face, same outfit, no morphing."
+ALWAYS append consistency lock: "Character appears exactly as shown in the starting frame. Same face structure, same skin tone, same clothing, no morphing or drift throughout the entire clip."
 
 [BLOCK 4 - ACTION]
 Specific actions the character performs. Include body language:
@@ -433,7 +432,8 @@ SFX: [specific sound effects].
 [BLOCK 7 - NEGATIVE PROMPT] (MANDATORY — never omit)
 Negative: subtitles, watermark, text on screen, blurry faces, distorted hands,
 character drift, morphing face, changing appearance, extra limbs, breed swap.
-For realistic material: add "cartoon, CGI, plastic skin, over-smoothed, AI look"
+For realistic material: add "cartoon, CGI, plastic skin, over-smoothed, AI look, face morphing, skin tone shift, outfit change, lip sync mismatch, blurry mouth"
+For realistic + dialogue: also add "face drift, inconsistent face, changing facial features, different person"
 For VERTICAL: add "16:9 landscape, horizontal composition, wide landscape shot, pillarboxed, letterboxed"
 For non-English projects: add "English dialogue"
 ```
@@ -443,6 +443,13 @@ For non-English projects: add "English dialogue"
 - **Camera movement as separate sentence** — never embed in action description
 - 2–3 shots max per 8s clip, use `then cut to` or timestamp format
 - Every prompt needs: lighting description + audio description
+
+**Dialogue scene camera rule (CRITICAL for realistic material):**
+When a character is speaking, the model must simultaneously sync lip movement + render realistic face + handle camera motion. This causes severe drift. Always follow:
+- **Use `locked-off static` or `very slow dolly in` ONLY** for any shot containing dialogue
+- **Never use** `handheld`, `tracking shot`, `pan`, `crane`, or `arc shot` when character is speaking
+- **Prefer `medium close-up` or `close-up`** — large face in frame = less hallucination, better lip sync
+- If the scene must have camera movement, place the movement BEFORE or AFTER the dialogue line, not during
 
 **Dialogue rules:**
 - Use `:` format to avoid subtitles: `Character says: "line" (no subtitles)`
