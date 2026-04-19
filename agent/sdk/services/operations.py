@@ -11,6 +11,7 @@ import asyncio
 import base64
 import json
 import logging
+import re
 import ssl
 from typing import TYPE_CHECKING, Optional
 
@@ -767,8 +768,22 @@ async def _build_video_prompt(base_prompt: str, scene: dict, project_id: str | N
     project_language = (project.get("language") or "").lower() if project else ""
 
     # --- Layer 1: Vertical format hint ---
-    if orientation == "VERTICAL" and "9:16" not in base_prompt:
-        parts.insert(0, "OUTPUT FORMAT: Vertical 9:16, portrait orientation, mobile-first framing.")
+    # Always inject the full compositional lock phrase for VERTICAL, regardless of whether
+    # the base prompt already mentions "9:16". A weak/partial declaration in the base prompt
+    # is often overridden by compositional triggers (POV shot, wide room, walking toward camera).
+    # The lock phrase must appear at the very start to anchor the model before it reads the action.
+    if orientation == "VERTICAL":
+        lock_phrase = (
+            "OUTPUT FORMAT: Vertical 9:16, portrait orientation, mobile-first framing, "
+            "tall narrow frame. Subject fills the frame from top to bottom. "
+            "No horizontal expansion. Camera positioned for portrait composition."
+        )
+        # Replace weak existing declaration if present, otherwise prepend
+        if "9:16" in base_prompt:
+            # Strip any existing OUTPUT FORMAT line from the base prompt to avoid duplication
+            cleaned = re.sub(r"OUTPUT FORMAT:[^\n.]*[.\n]?", "", base_prompt).strip()
+            parts[0] = cleaned
+        parts.insert(0, lock_phrase)
 
     # --- Layer 2: Photorealistic quality keywords ---
     if material == "realistic" and "natural skin texture" not in prompt_lower:
@@ -809,6 +824,10 @@ async def _build_video_prompt(base_prompt: str, scene: dict, project_id: str | N
                 parts.append("Audio: natural ambient sounds only, no background music, no narration, no voiceover.")
 
     # --- Layer 5: Enhanced negative prompt ---
+    vertical_neg_extras = [
+        "16:9 landscape", "horizontal composition",
+        "wide landscape shot", "pillarboxed", "letterboxed",
+    ]
     if "negative:" not in prompt_lower:
         neg_items = [
             "subtitles", "captions", "watermark", "text on screen",
@@ -819,11 +838,25 @@ async def _build_video_prompt(base_prompt: str, scene: dict, project_id: str | N
             neg_items.extend(["cartoon", "CGI", "plastic skin", "over-smoothed", "AI look"])
         # Orientation-specific negatives
         if orientation == "VERTICAL":
-            neg_items.append("16:9 landscape")
+            neg_items.extend(vertical_neg_extras)
         # Language-specific negatives (prevent wrong-language dialogue)
         if project_language and project_language != "en":
             neg_items.append("English dialogue")
         parts.append(f"Negative: {', '.join(neg_items)}.")
+    elif orientation == "VERTICAL":
+        # Prompt already has a Negative block — inject missing VERTICAL terms into it
+        missing = [t for t in vertical_neg_extras if t.lower() not in prompt_lower]
+        if missing:
+            # Append missing VERTICAL terms before the trailing period of the Negative line
+            combined = " ".join(parts)
+            combined = re.sub(
+                r"(Negative:[^.]+)\.",
+                lambda m: m.group(1) + ", " + ", ".join(missing) + ".",
+                combined,
+                count=1,
+                flags=re.IGNORECASE,
+            )
+            return combined
 
     return " ".join(parts)
 
