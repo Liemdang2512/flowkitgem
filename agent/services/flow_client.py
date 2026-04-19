@@ -382,17 +382,17 @@ class FlowClient:
         gen_type = "start_end_frame_2_video" if end_image_media_id else "frame_2_video"
         model_key = VIDEO_MODELS.get(user_paygate_tier, {}).get(gen_type, {}).get(aspect_ratio)
 
-        if not model_key:
-            return {"error": f"No model for tier={user_paygate_tier} type={gen_type} ratio={aspect_ratio}"}
-
         request = {
             "aspectRatio": aspect_ratio,
             "seed": int(time.time()) % 10000,
             "textInput": {"structuredPrompt": {"parts": [{"text": prompt}]}},
-            "videoModelKey": model_key,
             "startImage": {"mediaId": start_image_media_id},
             "metadata": {"sceneId": scene_id},
         }
+        # Only send videoModelKey when explicitly configured — empty string means
+        # let the server pick the correct model for the given aspectRatio (mirrors Flow UI behavior)
+        if model_key:
+            request["videoModelKey"] = model_key
 
         if end_image_media_id:
             request["endImage"] = {"mediaId": end_image_media_id}
@@ -429,20 +429,18 @@ class FlowClient:
         gen_type = "reference_frame_2_video"
         model_key = VIDEO_MODELS.get(user_paygate_tier, {}).get(gen_type, {}).get(aspect_ratio)
 
-        if not model_key:
-            return {"error": f"No model for tier={user_paygate_tier} type={gen_type} ratio={aspect_ratio}"}
-
         request = {
             "aspectRatio": aspect_ratio,
             "seed": int(time.time()) % 10000,
             "textInput": {"structuredPrompt": {"parts": [{"text": prompt}]}},
-            "videoModelKey": model_key,
             "referenceImages": [
                 {"mediaId": mid, "imageUsageType": "IMAGE_USAGE_TYPE_ASSET"}
                 for mid in reference_media_ids
             ],
             "metadata": {},
         }
+        if model_key:
+            request["videoModelKey"] = model_key
 
         body = {
             "mediaGenerationContext": {"batchId": f"{uuid.uuid4()}"},
