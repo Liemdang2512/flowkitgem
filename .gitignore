@@ -30,7 +30,7 @@ agent/active_project.json
 .claude/commands/fk:*
 .gemini/commands/
 AGENTS.md
-GEMINI.md
+
 .fk-setup.json
 
 # Logs
