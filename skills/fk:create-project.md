@@ -363,8 +363,14 @@ Write video prompts as **natural prose** — like briefing a film director. Veo 
 
 ```
 [BLOCK 1 - FORMAT]
-OUTPUT FORMAT: Vertical 9:16, portrait orientation, mobile-first framing.
+OUTPUT FORMAT: Vertical 9:16, portrait orientation, mobile-first framing,
+tall narrow frame. Subject fills the frame from top to bottom.
+No horizontal expansion. Camera positioned for portrait composition.
 (Only for VERTICAL projects. OMIT for HORIZONTAL.)
+
+⚠️ VERTICAL WARNING: VEO 3 was trained on 16:9 data. Just saying "9:16" is not
+enough — use the full compositional lock phrase above. Avoid "wide shot" + room/landscape
+combinations (high risk of landscape render). Prefer medium/close-up shots for VERTICAL.
 
 [BLOCK 2 - SHOT]
 Shot type + camera angle. Camera movement as SEPARATE sentence.
@@ -394,7 +400,7 @@ SFX: [specific sound effects].
 [BLOCK 7 - NEGATIVE PROMPT] (MANDATORY — never omit)
 Negative: subtitles, watermark, text on screen, blurry faces, distorted hands.
 For realistic material: add "cartoon, CGI, plastic skin, over-smoothed, AI look"
-For VERTICAL: add "16:9 landscape"
+For VERTICAL: add "16:9 landscape, horizontal composition, wide landscape shot, pillarboxed, letterboxed"
 For non-English projects: add "English dialogue"
 ```
 
@@ -428,9 +434,12 @@ Release  (7-8s): Pull back to wide — breathing room
 
 **Example (Vietnamese documentary, VERTICAL, realistic):**
 ```
-OUTPUT FORMAT: Vertical 9:16, portrait orientation, mobile-first framing.
+OUTPUT FORMAT: Vertical 9:16, portrait orientation, mobile-first framing,
+tall narrow frame. Subject fills the frame from top to bottom.
+No horizontal expansion. Camera positioned for portrait composition.
 
 Medium close-up, eye level. The camera slowly pushes in.
+Tight vertical frame, subject fills portrait height from head to mid-torso.
 
 A middle-aged Vietnamese fisherman mending nets on a wooden boat.
 Photorealistic, 4K, natural skin texture, subtle micro-expressions,
@@ -449,7 +458,8 @@ Speaks natural Vietnamese, clear pronunciation.
 Audio: gentle waves lapping against wooden hull, distant seagulls.
 SFX: thread pulling through net fabric.
 Negative: cartoon, CGI, plastic skin, blurry face, distorted hands,
-16:9 landscape, English dialogue, over-smoothed, watermark.
+16:9 landscape, horizontal composition, wide landscape shot, pillarboxed,
+English dialogue, over-smoothed, watermark.
 ```
 
 **Example (non-realistic material, HORIZONTAL):**
@@ -501,7 +511,9 @@ See `fk:gen-narrator.md` for word count limits per language and narrative arc gu
 | `"cinematic"` alone | Meaningless without specifics | `"Wide angle, low light, shallow depth of field, warm backlight"` |
 | `"Scene 1: Luna is happy"` | Emotion without action or environment | `"Luna jumps up with arms raised at Chocolate River, face lit with joy. Medium shot."` |
 | `"Camera zooms in on the action"` | Vague camera direction | `"Slow push in to close-up of Hero's eyes reflecting golden glow, rack focus from sword to face"` |
-| No format declaration (VERTICAL project) | AI defaults to 16:9 landscape | Prepend `"OUTPUT FORMAT: Vertical 9:16, portrait orientation, mobile-first."` |
+| No format declaration (VERTICAL project) | AI defaults to 16:9 landscape | Prepend full lock: `"OUTPUT FORMAT: Vertical 9:16, portrait orientation, tall narrow frame. Subject fills the frame from top to bottom. No horizontal expansion."` |
+| VERTICAL: using "wide shot" + room/person → renders landscape, pads to 9:16 | VEO 3 trained on 16:9, wide shot triggers horizontal composition | Replace wide shot with medium/close-up. Add "tight vertical frame, portrait composition" to SHOT block |
+| VERTICAL: FORMAT says "9:16" but no compositional lock → still renders landscape | Single aspect ratio token overridden by compositional triggers in prompt | Use full lock phrase + add to SHOT: "fills vertical height" + add to NEGATIVE: "16:9 landscape, horizontal composition, pillarboxed" |
 | Vietnamese dialogue written in English | AI translates, loses natural accent | Use `[DIALOGUE - VIETNAMESE ONLY]: "Tiếng Việt"` block, never translate |
 | Characters look like CGI/plastic | Missing quality keywords | Add `"photorealistic, 4K, natural skin texture, no AI smoothing"` (realistic only) |
 | No negative prompt | AI generates watermarks, wrong format, subtitles | Always end with `Negative: subtitles, watermark, CGI, plastic skin...` |

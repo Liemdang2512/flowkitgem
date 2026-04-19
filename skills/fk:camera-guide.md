@@ -25,13 +25,42 @@ Reference for writing video prompts optimized for Google Veo 3. Veo 3 generates 
 
 | Block | Role | Rule |
 |-------|------|------|
-| FORMAT | Aspect ratio declaration | VERTICAL: include `OUTPUT FORMAT: Vertical 9:16`. HORIZONTAL: omit |
-| SHOT | Shot type, angle, movement | Camera movement as **separate sentence** |
+| FORMAT | Aspect ratio + compositional lock | VERTICAL: include full lock phrase (see below). HORIZONTAL: omit |
+| SHOT | Shot type, angle, movement | Camera movement as **separate sentence**. VERTICAL: prefer medium/close-up over wide shots |
 | SUBJECT | Character, object | Action-focused. For realistic: add `photorealistic, 4K, natural skin texture` |
 | ACTION | Motion, emotion, body language | `natural hand gestures`, `relaxed posture` |
 | ENVIRONMENT | Location, time, weather, lighting | MANDATORY: lighting + color temperature |
 | DIALOGUE + AUDIO | Speech + sound design | Dialogue in target language `[DIALOGUE - LANG ONLY]`. Audio/SFX labels at end |
-| NEGATIVE | Exclusions | Always: `subtitles, watermark`. Realistic: add `CGI, plastic skin`. VERTICAL: add `16:9 landscape` |
+| NEGATIVE | Exclusions | Always: `subtitles, watermark`. Realistic: add `CGI, plastic skin`. VERTICAL: add `16:9 landscape, horizontal composition, wide landscape shot, pillarboxed` |
+
+### BLOCK 1 — VERTICAL Compositional Lock (mandatory for VERTICAL projects)
+
+VEO 3 was trained predominantly on 16:9 data. Simply writing `"9:16"` causes the model to render landscape and pad to portrait. You must use **compositional lock** language that describes a tall frame — not just an aspect ratio declaration.
+
+**VERTICAL FORMAT block (full phrase — use exactly this):**
+```
+OUTPUT FORMAT: Vertical 9:16, portrait orientation, mobile-first framing, tall narrow frame. Subject fills the frame from top to bottom. No horizontal expansion. Camera positioned for portrait composition.
+```
+
+**Compositional lock keywords — use at least 2 in every VERTICAL prompt:**
+- `subject fills the full vertical height of frame`
+- `tall narrow frame, portrait composition`
+- `tight vertical framing, no wide horizontal space`
+- `framed head-to-toe in portrait orientation`
+- `close-up portrait, fills vertical frame`
+- `vertical pan from top to bottom`
+- `camera pointing straight up/down the vertical axis`
+
+**Shot type rules for VERTICAL:**
+
+| Shot | VERTICAL risk | Workaround |
+|------|--------------|------------|
+| `wide shot` of room/landscape | HIGH — triggers 16:9 | Use `medium shot` or `close-up`. Add "tight vertical frame" |
+| `establishing shot` | HIGH | Replace with `overhead shot` or `close vertical establishing frame` |
+| `medium shot` of standing person | LOW | Safe — specify "fills vertical frame from head to mid-thigh" |
+| `close-up` / `medium close-up` | SAFE | Natural portrait framing |
+| `tracking shot` following walking subject | LOW | Specify "camera stays tight on subject, portrait frame" |
+| `overhead top-down shot` | SAFE | Inherently vertical |
 
 See **Photorealistic Template** section below for full template with examples.
 
@@ -281,8 +310,10 @@ Negative: cartoon, CGI, plastic skin, blurry face, distorted hands,
 over-smoothed, AI look, watermark, text on screen, logo
 ```
 
-**Format guard (VERTICAL projects):**
-Add to negative: `16:9 landscape, horizontal framing`
+**Format guard (VERTICAL projects) — use ALL of these:**
+Add to negative: `16:9 landscape, horizontal composition, wide landscape shot, pillarboxed, letterboxed, horizontal framing`
+
+> **Why so many terms?** VEO 3's training data is overwhelmingly 16:9. A single `"16:9 landscape"` token is often overridden by strong compositional triggers (wide shot + room + person standing = landscape). Multiple negative terms create redundant pressure against landscape rendering.
 
 **Language guard (non-English projects):**
 Add to negative: `English dialogue, English text, translated speech`
@@ -323,12 +354,15 @@ Negative: subtitles, watermark, text overlay, [other unwanted elements]
 For `realistic` material projects, use this enhanced template — prevents CGI/plastic look:
 
 ```
-[FORMAT] (VERTICAL only)
-OUTPUT FORMAT: Vertical 9:16, portrait orientation, mobile-first framing.
+[FORMAT] (VERTICAL only — use full compositional lock phrase)
+OUTPUT FORMAT: Vertical 9:16, portrait orientation, mobile-first framing,
+tall narrow frame. Subject fills the frame from top to bottom.
+No horizontal expansion. Camera positioned for portrait composition.
 
 [SHOT]
-[Shot type] of [subject], [action/emotion].
+[Shot type — prefer medium/close-up for VERTICAL] of [subject], [action/emotion].
 [Camera movement as separate sentence].
+(VERTICAL: add compositional lock keyword, e.g. "tight vertical frame, portrait composition.")
 
 [SUBJECT + QUALITY]
 [Subject with action focus]. Photorealistic, cinematic 4K,
@@ -355,6 +389,7 @@ SFX: [specific sound effects].
 [NEGATIVE]
 Negative: cartoon, CGI, plastic skin, blurry face, distorted hands,
 over-smoothed, watermark, text on screen, [format guard], [language guard].
+(VERTICAL format guard: 16:9 landscape, horizontal composition, wide landscape shot, pillarboxed, letterboxed)
 ```
 
 ---
@@ -422,7 +457,9 @@ Before submitting any video prompt, verify:
 - [ ] Character description consistent across multi-prompt sequences
 - [ ] Negative prompt included (at minimum: `subtitles, watermark`)
 - [ ] For realistic material: includes `natural skin texture, photorealistic, 4K, no AI smoothing`
-- [ ] For VERTICAL projects: includes `Vertical 9:16, portrait orientation` format hint
+- [ ] For VERTICAL projects: includes full compositional lock phrase: `Vertical 9:16, portrait orientation, tall narrow frame, subject fills vertical height, no horizontal expansion`
+- [ ] For VERTICAL projects: avoids wide shots of rooms/landscapes without adding "tight vertical frame" override
+- [ ] For VERTICAL projects: negative includes `16:9 landscape, horizontal composition, wide landscape shot, pillarboxed`
 - [ ] Non-English dialogue stays in original language (not translated to English)
 - [ ] Dialogue wrapped in language-labeled block: `[DIALOGUE - VIETNAMESE ONLY]` (or appropriate language)
 - [ ] Extended negative includes format guard (`16:9 landscape`) and language guard (`English dialogue`)
@@ -445,3 +482,6 @@ Before submitting any video prompt, verify:
 | Vague words like `"cinematic"` alone | Specify: `shallow DOF + golden hour + dolly in` |
 | `"Camera zooms"` — too vague | `The camera slowly dollies in.` (separate sentence) |
 | No negative prompt | Always: `Negative: subtitles, watermark, text overlay` |
+| VERTICAL: wide shot + person in room → renders landscape and pads | VEO 3 defaults to 16:9 when "wide" + "standing in space" → use medium/close-up + compositional lock keywords |
+| VERTICAL: FORMAT block only says `"9:16"` → still renders landscape | Single aspect ratio token is overridden by compositional triggers. Use full lock phrase: `"tall narrow frame, subject fills vertical height, no horizontal expansion"` |
+| VERTICAL: no format guard in negative → landscape render | Always add to negative: `16:9 landscape, horizontal composition, wide landscape shot, pillarboxed` |
