@@ -827,6 +827,7 @@ async def _build_video_prompt(base_prompt: str, scene: dict, project_id: str | N
     vertical_neg_extras = [
         "16:9 landscape", "horizontal composition",
         "wide landscape shot", "pillarboxed", "letterboxed",
+        "black bars", "cropped sides", "padding",
     ]
     if "negative:" not in prompt_lower:
         neg_items = [

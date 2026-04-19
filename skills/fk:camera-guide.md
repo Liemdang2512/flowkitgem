@@ -326,7 +326,7 @@ over-smoothed, AI look, watermark, text on screen, logo
 ```
 
 **Format guard (VERTICAL projects) — use ALL of these:**
-Add to negative: `16:9 landscape, horizontal composition, wide landscape shot, pillarboxed, letterboxed, horizontal framing`
+Add to negative: `16:9 landscape, horizontal composition, wide landscape shot, pillarboxed, letterboxed, black bars, cropped sides, padding, horizontal framing`
 
 > **Why so many terms?** VEO 3's training data is overwhelmingly 16:9. A single `"16:9 landscape"` token is often overridden by strong compositional triggers (wide shot + room + person standing = landscape). Multiple negative terms create redundant pressure against landscape rendering.
 
@@ -404,7 +404,7 @@ SFX: [specific sound effects].
 [NEGATIVE]
 Negative: cartoon, CGI, plastic skin, blurry face, distorted hands,
 over-smoothed, watermark, text on screen, [format guard], [language guard].
-(VERTICAL format guard: 16:9 landscape, horizontal composition, wide landscape shot, pillarboxed, letterboxed)
+(VERTICAL format guard: 16:9 landscape, horizontal composition, wide landscape shot, pillarboxed, letterboxed, black bars, cropped sides, padding)
 ```
 
 ---
