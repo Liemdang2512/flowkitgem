@@ -143,6 +143,59 @@ curl http://127.0.0.1:8100/health
 # {"status":"ok","extension_connected":true}
 ```
 
+## Installing Skills into your AI CLI
+
+Skills are workflow recipes in `skills/`. Run `setup.py` once to register them with your AI CLI.
+
+### Step 1 — Clone & setup server
+
+```bash
+git clone https://github.com/Liemdang2512/flowkitgem.git
+cd flowkitgem
+./setup.sh          # installs Python deps, checks ffmpeg/Chrome
+python -m agent.main
+```
+
+### Step 2 — Register skills
+
+```bash
+python setup.py
+```
+
+Choose which CLI(s) you use:
+
+```
+[1] Claude Code    → .claude/commands/fk:*
+[2] Gemini CLI     → .gemini/commands/fk/ + GEMINI.md
+[3] Codex CLI      → AGENTS.md
+[4] Antigravity    → ~/.gemini/skills/fk:*/
+[5] All of the above
+```
+
+That's it. Skills are now available as `/fk:<name>` commands in your chosen CLI.
+
+### Step 3 — Load Chrome extension
+
+1. Go to `chrome://extensions` → enable **Developer mode**
+2. Click **Load unpacked** → select the `extension/` folder
+3. Open [labs.google/fx/tools/flow](https://labs.google/fx/tools/flow) and sign in
+4. Verify: `curl http://127.0.0.1:8100/health` → `{"extension_connected":true}`
+
+---
+
+### Updating
+
+When there are new skills or fixes:
+
+```bash
+git pull
+python setup.py     # re-run with same options to sync updates
+```
+
+`setup.py` remembers your last choice — just press Enter to confirm or re-select.
+
+---
+
 ## End-to-End Example: "Pippip the Fish Merchant"
 
 A chubby cat sells fish at a market. 3 scenes, vertical, Pixar 3D style.
