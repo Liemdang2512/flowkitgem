@@ -3,6 +3,9 @@
  * Injects injected.js into MAIN world to access window.grecaptcha
  */
 (function () {
+  // Guard: content scripts re-run on SPA navigations
+  if (window.__flowkitContentInjected) return;
+  window.__flowkitContentInjected = true;
   const s = document.createElement('script');
   s.src = chrome.runtime.getURL('injected.js');
   s.onload = () => s.remove();

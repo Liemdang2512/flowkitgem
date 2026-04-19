@@ -1,3 +1,4 @@
+
 Generate 4 YouTube-optimized thumbnail variants for a project video.
 
 Usage: `/fk:thumbnail [project_id]`

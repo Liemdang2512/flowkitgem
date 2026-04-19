@@ -33,6 +33,10 @@ AGENTS.md
 GEMINI.md
 .fk-setup.json
 
+# Logs
+output.log
+*.log
+
 # OS
 .DS_Store
 Thumbs.db

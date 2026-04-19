@@ -1,3 +1,4 @@
+
 # fk:gen-narrator — Generate Narrator Text + TTS for All Scenes
 
 Auto-generate documentary-style narrator text from scene video_prompts, then generate TTS audio using a voice template.

@@ -1,3 +1,4 @@
+
 Generate scene images for all scenes in a video.
 
 Usage: `/fk:gen-images <project_id> <video_id>`

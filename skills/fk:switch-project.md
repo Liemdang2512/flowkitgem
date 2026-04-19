@@ -1,3 +1,4 @@
+
 # fk:switch-project — Switch Active Project
 
 Switch the active project so all skills automatically target the correct project without needing explicit `project_id`.

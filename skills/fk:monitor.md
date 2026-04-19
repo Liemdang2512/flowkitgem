@@ -1,3 +1,4 @@
+
 # fk:monitor — Full Pipeline Monitor
 
 Poll project pipeline status every N seconds, detect state changes across all stages, send Telegram notifications, and optionally auto-download completed upscales.

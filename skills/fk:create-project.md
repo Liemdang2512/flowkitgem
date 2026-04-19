@@ -1,3 +1,4 @@
+
 Create a new Google Flow video project. Ask the user for:
 
 1. **Project name** and **story** (brief plot summary)
@@ -280,7 +281,33 @@ Note: `transition_prompt` only needed for chain scenes that have a child scene. 
 - **NEVER describe character appearance** (eyes, hair, clothing, outfit) in `prompt` or `video_prompt` — reference images handle visual consistency via `imageInputs`. Write ACTION only.
 - Never use single-word or atmosphere-only prompts: `"epic"`, `"dramatic"`, `"cinematic"`
 - Always include a camera/composition cue at the end
-- All `prompt`, `video_prompt`, and `image_prompt` MUST be in English regardless of project language
+- All `prompt`, `video_prompt`, and `image_prompt` MUST be in English regardless of project language — EXCEPT dialogue text which stays in the project's language
+
+---
+
+### Photorealistic Quality Keywords (material = realistic)
+
+When the project material is `realistic`, ALL image and video prompts MUST include quality keywords to prevent CGI/plastic look:
+
+**In scene `prompt` (image) — append at end:**
+```
+Photorealistic, cinematic 4K, natural skin texture, subtle micro-expressions,
+natural eye blinking, no AI smoothing filter, no CGI look.
+```
+
+**Body language (match to scene action):**
+```
+relaxed posture, natural hand gestures
+```
+or scene-appropriate: `tense posture, clenched fists` / `leaning forward, animated gestures`
+
+**Lighting (match to scene mood):**
+```
+soft natural daylight, warm tone, no harsh shadows
+```
+or scene-appropriate: `dramatic side lighting` / `cold fluorescent overhead` / `golden hour backlight`
+
+**These keywords are NOT needed for:** `anime`, `3d_pixar`, `stop_motion`, `minecraft`, `oil_painting` materials.
 
 **CRITICAL: Character face visibility rule.**
 When a character appears in the scene image, their face MUST be fully visible (front-facing, three-quarter, or side profile). The AI video model will fabricate/hallucinate any face area not shown in the start frame, causing character inconsistency.
@@ -328,17 +355,52 @@ Google Flow's AI filter rejects prompts with violent, aggressive, or graphic lan
 
 ---
 
-### Video Prompt Formula (Veo 3)
+### Video Prompt Formula (Veo 3) — 7-Block Format
 
 Write video prompts as **natural prose** — like briefing a film director. Veo 3 generates native audio (dialogue, SFX, ambient) from text.
 
-**5-component structure:** `[Camera/Shot] + [Subject] + [Action] + [Setting] + [Style & Audio]`
+**MANDATORY 7-block structure** — follow this exact order for ALL video prompts:
+
+```
+[BLOCK 1 - FORMAT]
+OUTPUT FORMAT: Vertical 9:16, portrait orientation, mobile-first framing.
+(Only for VERTICAL projects. OMIT for HORIZONTAL.)
+
+[BLOCK 2 - SHOT]
+Shot type + camera angle. Camera movement as SEPARATE sentence.
+Example: "Medium shot, eye level. The camera slowly dollies in."
+
+[BLOCK 3 - SUBJECT]
+Action-focused subject description.
+For realistic material, append: "Photorealistic, 4K, natural skin texture,
+subtle micro-expressions, no AI smoothing filter."
+DO NOT describe character appearance (handled by ref images via imageInputs).
+
+[BLOCK 4 - ACTION]
+Specific actions the character performs. Include body language:
+"natural hand gestures", "relaxed posture", "jaw tightens".
+
+[BLOCK 5 - ENVIRONMENT]
+Background setting + time of day + weather/atmosphere.
+Lighting description (MANDATORY): "soft natural daylight, warm tone"
+or scene-appropriate lighting. Color temperature.
+
+[BLOCK 6 - DIALOGUE + AUDIO] (dialogue only if scene has speaking)
+[DIALOGUE - {LANGUAGE} ONLY]: Character says: "..." (no subtitles)
+Speaks natural {language}, clear pronunciation.
+Audio: [ambient sounds].
+SFX: [specific sound effects].
+
+[BLOCK 7 - NEGATIVE PROMPT] (MANDATORY — never omit)
+Negative: subtitles, watermark, text on screen, blurry faces, distorted hands.
+For realistic material: add "cartoon, CGI, plastic skin, over-smoothed, AI look"
+For VERTICAL: add "16:9 landscape"
+For non-English projects: add "English dialogue"
+```
 
 **Critical rules:**
-- **100–150 words** (3–6 sentences)
+- **100–150 words** total (3–6 sentences across all blocks)
 - **Camera movement as separate sentence** — never embed in action description
-- **Audio/SFX/Music labels** at end of prompt, separated
-- **Negative prompt** always appended: `Negative: subtitles, watermark, text overlay`
 - 2–3 shots max per 8s clip, use `then cut to` or timestamp format
 - Every prompt needs: lighting description + audio description
 
@@ -349,6 +411,13 @@ Write video prompts as **natural prose** — like briefing a film director. Veo 
 - Delivery verbs: `says`, `whispers`, `shouts`, `gasps`, `asks`, `replies`, `murmurs`
 - Silent segments are powerful — not every shot needs dialogue
 
+**Multilingual dialogue rules (CRITICAL):**
+- Dialogue in the target language MUST be written in that language, NOT translated to English
+- Wrap in a labeled block: `[DIALOGUE - VIETNAMESE ONLY]: "Nội dung tiếng Việt"` (or `JAPANESE ONLY`, `KOREAN ONLY`, etc.)
+- Add language enforcement after each dialogue: `speaks natural Vietnamese, clear pronunciation`
+- Add `(no subtitles)` after each dialogue line
+- NEVER translate dialogue to English — even though the rest of the prompt is in English
+
 **Emotional arc pattern (map to 8s):**
 ```
 Opening  (0-2s): Wide/establishing — set the stage
@@ -357,7 +426,33 @@ Peak     (5-7s): Close-up — maximum emotion
 Release  (7-8s): Pull back to wide — breathing room
 ```
 
-**Example:**
+**Example (Vietnamese documentary, VERTICAL, realistic):**
+```
+OUTPUT FORMAT: Vertical 9:16, portrait orientation, mobile-first framing.
+
+Medium close-up, eye level. The camera slowly pushes in.
+
+A middle-aged Vietnamese fisherman mending nets on a wooden boat.
+Photorealistic, 4K, natural skin texture, subtle micro-expressions,
+no AI smoothing filter.
+
+His weathered hands pull thread through torn netting with practiced ease.
+Natural hand movements, relaxed posture, occasional glance at the horizon.
+
+Small fishing boat anchored in calm emerald bay at golden hour.
+Soft warm backlight creating rim light on his silhouette.
+Distant limestone karsts in background, hazy atmosphere.
+
+[DIALOGUE - VIETNAMESE ONLY]: Fisherman says: "Biển hôm nay hiền lắm." (no subtitles)
+Speaks natural Vietnamese, clear pronunciation.
+
+Audio: gentle waves lapping against wooden hull, distant seagulls.
+SFX: thread pulling through net fabric.
+Negative: cartoon, CGI, plastic skin, blurry face, distorted hands,
+16:9 landscape, English dialogue, over-smoothed, watermark.
+```
+
+**Example (non-realistic material, HORIZONTAL):**
 ```
 Wide shot of Luna emerging from a rocket onto a vast candy landscape,
 cotton candy clouds towering above, long candy-colored shadows stretching
@@ -406,6 +501,11 @@ See `fk:gen-narrator.md` for word count limits per language and narrative arc gu
 | `"cinematic"` alone | Meaningless without specifics | `"Wide angle, low light, shallow depth of field, warm backlight"` |
 | `"Scene 1: Luna is happy"` | Emotion without action or environment | `"Luna jumps up with arms raised at Chocolate River, face lit with joy. Medium shot."` |
 | `"Camera zooms in on the action"` | Vague camera direction | `"Slow push in to close-up of Hero's eyes reflecting golden glow, rack focus from sword to face"` |
+| No format declaration (VERTICAL project) | AI defaults to 16:9 landscape | Prepend `"OUTPUT FORMAT: Vertical 9:16, portrait orientation, mobile-first."` |
+| Vietnamese dialogue written in English | AI translates, loses natural accent | Use `[DIALOGUE - VIETNAMESE ONLY]: "Tiếng Việt"` block, never translate |
+| Characters look like CGI/plastic | Missing quality keywords | Add `"photorealistic, 4K, natural skin texture, no AI smoothing"` (realistic only) |
+| No negative prompt | AI generates watermarks, wrong format, subtitles | Always end with `Negative: subtitles, watermark, CGI, plastic skin...` |
+| Describing character appearance in prompt | Conflicts with ref images | Write ACTION only — ref images handle appearance via `imageInputs` |
 
 ---
 

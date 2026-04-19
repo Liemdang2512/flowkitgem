@@ -1,3 +1,4 @@
+
 # fk:research — Fact-Check & Research Before Scripting
 
 Research and verify real-world events before creating documentary content. This skill MUST be run before `/fk:create-project` for any documentary project.

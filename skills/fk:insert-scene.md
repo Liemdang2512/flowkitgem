@@ -1,3 +1,4 @@
+
 Insert new scene(s) into an existing video chain — for multi-angle shots, cutaways, or close-ups.
 
 Usage: `/insert-scene <video_id> <after_scene_order> <prompt>`

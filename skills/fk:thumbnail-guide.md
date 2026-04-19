@@ -1,3 +1,4 @@
+
 # YouTube Thumbnail Guide — Hook-Worthy Design Rules
 
 ## Required Elements

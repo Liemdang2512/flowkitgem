@@ -1,3 +1,4 @@
+
 Trim each scene video to fit its TTS narrator duration, burn text overlays, then concatenate into a final video.
 
 Usage: `/fk:concat-fit-narrator <video_id> [--buffer 0.5] [--4k]`

@@ -1,3 +1,4 @@
+
 # fk:gen-text-overlays — Generate Text Overlays from Narrator Text
 
 Analyze narrator text for each scene and extract key data points (dates, locations, statistics, milestones, costs) to create `text_overlays.json` for `/fk:concat-fit-narrator`.

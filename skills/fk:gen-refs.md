@@ -1,3 +1,4 @@
+
 Generate reference images for all entities in a project.
 
 Usage: `/fk:gen-refs <project_id>`

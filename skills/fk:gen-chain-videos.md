@@ -1,3 +1,4 @@
+
 Generate videos with automatic scene chaining (start+end frame transitions).
 
 Usage: `/gen-chain-videos <project_id> <video_id>`

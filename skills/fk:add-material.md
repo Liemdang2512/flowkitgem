@@ -1,3 +1,4 @@
+
 # fk:add-material — Image Material System
 
 Image Material controls the **visual style** of every image generated in a project — both entity reference images and scene images. Set it once at project creation; it applies automatically to all generations.

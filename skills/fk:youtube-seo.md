@@ -1,3 +1,4 @@
+
 # fk:youtube-seo — Generate YouTube Metadata (SEO-Optimized)
 
 Generate SEO-optimized YouTube metadata: hook title, description, hashtags, and niche keywords.

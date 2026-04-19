@@ -305,7 +305,7 @@ class OperationService:
             base_prompt = scene["transition_prompt"]
         else:
             base_prompt = scene.get("video_prompt") or scene.get("prompt", "")
-        prompt = await _build_video_prompt(base_prompt, scene, pid)
+        prompt = await _build_video_prompt(base_prompt, scene, pid, orientation)
 
         # Check if already submitted (op_name saved from previous attempt)
         existing_op = None
@@ -370,7 +370,7 @@ class OperationService:
             base_prompt = scene["transition_prompt"]
         else:
             base_prompt = scene.get("video_prompt") or scene.get("prompt", "")
-        prompt = await _build_video_prompt(base_prompt, scene, pid)
+        prompt = await _build_video_prompt(base_prompt, scene, pid, orientation)
 
         char_names_raw = scene.get("character_names")
         if isinstance(char_names_raw, str):
@@ -745,13 +745,40 @@ class OperationService:
 # Prompt building (module-level for reuse)
 # ------------------------------------------------------------------
 
-async def _build_video_prompt(base_prompt: str, scene: dict, project_id: str | None) -> str:
-    """Enhance video prompt with Veo 3 audio instructions and negative prompt."""
-    parts = [base_prompt.strip()]
+async def _build_video_prompt(base_prompt: str, scene: dict, project_id: str | None,
+                              orientation: str = "VERTICAL") -> str:
+    """Enhance video prompt with Veo 3 audio instructions, quality keywords, and negative prompt.
 
-    # Only append voice context when video_prompt contains dialogue (verb-based detection)
-    dialogue_verbs = ("says", "whispers", "shouts", "asks", "replies", "murmurs", "exclaims", "gasps", "laughs", "mutters")
+    Auto-enrichment layers:
+    1. Vertical 9:16 format hint (VERTICAL projects)
+    2. Photorealistic quality keywords (realistic material)
+    3. Voice context for dialogue scenes
+    4. Audio control (music/voice flags)
+    5. Enhanced negative prompt (material + orientation guards)
+    """
+    parts = [base_prompt.strip()]
     prompt_lower = base_prompt.lower()
+
+    # Load project once for all enrichment checks
+    project = None
+    if project_id:
+        project = await crud.get_project(project_id)
+    material = (project.get("material") or "").lower() if project else ""
+    project_language = (project.get("language") or "").lower() if project else ""
+
+    # --- Layer 1: Vertical format hint ---
+    if orientation == "VERTICAL" and "9:16" not in base_prompt:
+        parts.insert(0, "OUTPUT FORMAT: Vertical 9:16, portrait orientation, mobile-first framing.")
+
+    # --- Layer 2: Photorealistic quality keywords ---
+    if material == "realistic" and "natural skin texture" not in prompt_lower:
+        parts.append(
+            "Photorealistic, natural skin texture, subtle micro-expressions, "
+            "natural eye blinking, cinematic 4K, no AI smoothing filter, no CGI look."
+        )
+
+    # --- Layer 3: Voice context for dialogue ---
+    dialogue_verbs = ("says", "whispers", "shouts", "asks", "replies", "murmurs", "exclaims", "gasps", "laughs", "mutters")
     has_dialogue = any(verb in prompt_lower for verb in dialogue_verbs)
     if project_id and has_dialogue:
         char_names_raw = scene.get("character_names")
@@ -770,28 +797,33 @@ async def _build_video_prompt(base_prompt: str, scene: dict, project_id: str | N
             if voices:
                 parts.append("Character voices: " + ". ".join(voices) + ".")
 
-    # Check project-level audio flags — Veo 3 Audio label format
-    allow_music = False
-    allow_voice = False
-    if project_id:
-        project = await crud.get_project(project_id)
-        if project:
-            if project.get("allow_music"):
-                allow_music = True
-            if project.get("allow_voice"):
-                allow_voice = True
+    # --- Layer 4: Audio control ---
+    allow_music = bool(project.get("allow_music")) if project else False
+    allow_voice = bool(project.get("allow_voice")) if project else False
 
     if not allow_music:
-        # Only append if prompt doesn't already have Audio:/Music: labels
         if "audio:" not in prompt_lower and "music:" not in prompt_lower:
             if allow_voice:
                 parts.append("Audio: no background music. Keep character dialogue and natural ambient sounds.")
             else:
                 parts.append("Audio: natural ambient sounds only, no background music, no narration, no voiceover.")
 
-    # Veo 3 negative prompt — always append unless already present
+    # --- Layer 5: Enhanced negative prompt ---
     if "negative:" not in prompt_lower:
-        parts.append("Negative: subtitles, captions, watermark, text on screen, logo, blurry faces, distorted hands.")
+        neg_items = [
+            "subtitles", "captions", "watermark", "text on screen",
+            "logo", "blurry faces", "distorted hands",
+        ]
+        # Material-specific negatives
+        if material == "realistic":
+            neg_items.extend(["cartoon", "CGI", "plastic skin", "over-smoothed", "AI look"])
+        # Orientation-specific negatives
+        if orientation == "VERTICAL":
+            neg_items.append("16:9 landscape")
+        # Language-specific negatives (prevent wrong-language dialogue)
+        if project_language and project_language != "en":
+            neg_items.append("English dialogue")
+        parts.append(f"Negative: {', '.join(neg_items)}.")
 
     return " ".join(parts)
 

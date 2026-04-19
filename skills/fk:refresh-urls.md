@@ -1,3 +1,4 @@
+
 Refresh expired GCS signed URLs for all scenes in a video (images, videos, upscale videos) and character reference images.
 
 Usage: `/fk:refresh-urls <video_id> [--project-id <PID>]`

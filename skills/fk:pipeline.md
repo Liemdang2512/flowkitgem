@@ -1,3 +1,4 @@
+
 # fk:pipeline — Smart Full-Pipeline Orchestrator
 
 Auto-detect project state and run the correct stages (continuation or full run). Handles batching, parallelism, retries, downloads, TTS, and Telegram notifications.

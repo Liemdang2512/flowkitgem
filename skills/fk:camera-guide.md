@@ -1,3 +1,4 @@
+
 # Camera Guide — Cinematic Video Prompts (Veo 3)
 
 Reference for writing video prompts optimized for Google Veo 3. Veo 3 generates native audio (dialogue, SFX, ambient) from text — no audio upload needed.
@@ -10,19 +11,29 @@ Reference for writing video prompts optimized for Google Veo 3. Veo 3 generates 
 - **Audio:** Always describe at end of prompt with `Audio:`, `SFX:`, `Music:` labels
 - **Negative prompt:** Always append `Negative: subtitles, watermark, text overlay`
 
-### 5-Component Structure
+### 7-Block Structure (MANDATORY for all video prompts)
 
 ```
-[Camera/Shot] + [Subject] + [Action] + [Setting] + [Style & Audio]
+[BLOCK 1 - FORMAT] → Vertical 9:16 (VERTICAL projects only)
+[BLOCK 2 - SHOT] → Shot type + camera angle + movement (separate sentence)
+[BLOCK 3 - SUBJECT] → Action-focused description (+ photorealistic tags for realistic material)
+[BLOCK 4 - ACTION] → Body language, gestures, specific movements
+[BLOCK 5 - ENVIRONMENT] → Setting + lighting + atmosphere
+[BLOCK 6 - DIALOGUE + AUDIO] → Dialogue in target language + Audio/SFX labels
+[BLOCK 7 - NEGATIVE] → Mandatory exclusions (subtitles, watermark, etc.)
 ```
 
-| Component | Role | Rule |
-|-----------|------|------|
-| Camera | Shot type, angle, movement | Write as **separate sentence** |
-| Subject | Character, object | Detailed: age, clothing, hair, identifying features |
-| Action | Motion, emotion, dialogue | Can sequence multiple emotions in one prompt |
-| Setting | Location, time, weather | Background + environment + props |
-| Style & Audio | Visual aesthetic + sound | Audio labels at end of prompt, separated |
+| Block | Role | Rule |
+|-------|------|------|
+| FORMAT | Aspect ratio declaration | VERTICAL: include `OUTPUT FORMAT: Vertical 9:16`. HORIZONTAL: omit |
+| SHOT | Shot type, angle, movement | Camera movement as **separate sentence** |
+| SUBJECT | Character, object | Action-focused. For realistic: add `photorealistic, 4K, natural skin texture` |
+| ACTION | Motion, emotion, body language | `natural hand gestures`, `relaxed posture` |
+| ENVIRONMENT | Location, time, weather, lighting | MANDATORY: lighting + color temperature |
+| DIALOGUE + AUDIO | Speech + sound design | Dialogue in target language `[DIALOGUE - LANG ONLY]`. Audio/SFX labels at end |
+| NEGATIVE | Exclusions | Always: `subtitles, watermark`. Realistic: add `CGI, plastic skin`. VERTICAL: add `16:9 landscape` |
+
+See **Photorealistic Template** section below for full template with examples.
 
 **Critical rule — camera as separate sentence:**
 - Wrong: `A woman walks down the street as the camera dollies in with warm lighting`
@@ -264,6 +275,18 @@ Veo 3 supports negative prompts — list keywords to exclude (no instructive lan
 Negative: subtitles, captions, watermark, text on screen, logo, blurry faces, distorted hands
 ```
 
+**Photorealistic negative (material = realistic):**
+```
+Negative: cartoon, CGI, plastic skin, blurry face, distorted hands,
+over-smoothed, AI look, watermark, text on screen, logo
+```
+
+**Format guard (VERTICAL projects):**
+Add to negative: `16:9 landscape, horizontal framing`
+
+**Language guard (non-English projects):**
+Add to negative: `English dialogue, English text, translated speech`
+
 **Situational additions:**
 
 | Problem | Add to negative |
@@ -273,6 +296,9 @@ Negative: subtitles, captions, watermark, text on screen, logo, blurry faces, di
 | Laugh track | `studio audience laughter` |
 | Unwanted music | `background music` |
 | Over-cinematic | `editorial narration` |
+| CGI/plastic look | `CGI, plastic skin, over-smoothed, AI look` |
+| Wrong aspect ratio | `16:9 landscape` (for VERTICAL) or `9:16 portrait` (for HORIZONTAL) |
+| Wrong dialogue language | `English dialogue` (for non-EN projects) |
 
 ---
 
@@ -290,6 +316,45 @@ SFX: [specific sound effects].
 Music: [background music description].
 
 Negative: subtitles, watermark, text overlay, [other unwanted elements]
+```
+
+### Photorealistic Template (material = realistic)
+
+For `realistic` material projects, use this enhanced template — prevents CGI/plastic look:
+
+```
+[FORMAT] (VERTICAL only)
+OUTPUT FORMAT: Vertical 9:16, portrait orientation, mobile-first framing.
+
+[SHOT]
+[Shot type] of [subject], [action/emotion].
+[Camera movement as separate sentence].
+
+[SUBJECT + QUALITY]
+[Subject with action focus]. Photorealistic, cinematic 4K,
+natural skin texture, subtle micro-expressions,
+no AI smoothing filter, no CGI look.
+
+[ACTION]
+[Specific body language, hand gestures, movement].
+Natural posture, [scene-appropriate body language].
+
+[ENVIRONMENT]
+[Setting + time of day + weather].
+[Lighting: soft natural daylight, warm tone, no harsh shadows].
+[Color temperature + atmosphere].
+
+[DIALOGUE] (if applicable)
+[DIALOGUE - {LANGUAGE} ONLY]: Character says: "..." (no subtitles)
+Speaks natural {language}, clear pronunciation.
+
+[AUDIO]
+Audio: [ambient sounds].
+SFX: [specific sound effects].
+
+[NEGATIVE]
+Negative: cartoon, CGI, plastic skin, blurry face, distorted hands,
+over-smoothed, watermark, text on screen, [format guard], [language guard].
 ```
 
 ---
@@ -356,6 +421,11 @@ Before submitting any video prompt, verify:
 - [ ] Multi-shot: max 2–3, with match-action cues at transitions
 - [ ] Character description consistent across multi-prompt sequences
 - [ ] Negative prompt included (at minimum: `subtitles, watermark`)
+- [ ] For realistic material: includes `natural skin texture, photorealistic, 4K, no AI smoothing`
+- [ ] For VERTICAL projects: includes `Vertical 9:16, portrait orientation` format hint
+- [ ] Non-English dialogue stays in original language (not translated to English)
+- [ ] Dialogue wrapped in language-labeled block: `[DIALOGUE - VIETNAMESE ONLY]` (or appropriate language)
+- [ ] Extended negative includes format guard (`16:9 landscape`) and language guard (`English dialogue`)
 - [ ] No abstract words — everything is visual/audible and specific
 - [ ] Reference characters appear consistently across shots (action only, not appearance)
 

@@ -1,3 +1,4 @@
+
 Show full status dashboard for a project.
 
 Usage: `/fk:status <project_id>` or `/fk:status` (lists all projects)

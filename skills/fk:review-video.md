@@ -1,3 +1,4 @@
+
 Review AI-generated scene videos for quality using Claude Vision.
 
 Usage: `/fk:review-video <video_id> [--mode light|deep]`
@@ -211,6 +212,9 @@ MINOR errors → acceptable for most use cases. Polish optional.
 | Brand logos | Add "no brand logos, no text" to prompt |
 | Camera drift | Add "static camera" or "locked-off shot" to video_prompt |
 | Human hands | Add "paws, claws, hooves" (or correct anatomy) to prompt |
+| CGI/plastic look | Add `natural skin texture, photorealistic, 4K, no AI smoothing` to prompt (realistic material) |
+| Wrong aspect ratio (16:9 vs 9:16) | Verify project orientation; add `OUTPUT FORMAT: Vertical 9:16` to prompt; add `16:9 landscape` to Negative |
+| Dialogue in wrong language | Use `[DIALOGUE - VIETNAMESE ONLY]` block; add `English dialogue` to Negative; never translate dialogue |
 
 ## Cost Note
 

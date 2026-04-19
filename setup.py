@@ -26,6 +26,7 @@ GEMINI_COMMANDS_DIR = ROOT / ".gemini" / "commands" / "gla"
 AGENTS_MD = ROOT / "AGENTS.md"
 GEMINI_MD = ROOT / "GEMINI.md"
 STATE_FILE = ROOT / ".fk-setup.json"
+ANTIGRAVITY_SKILLS_DIR = Path.home() / ".gemini" / "skills"
 
 
 def discover_skills():
@@ -39,10 +40,12 @@ def discover_skills():
         name = path.stem[len("fk:"):]  # strip "fk:" prefix
         description = ""
         try:
-            first_line = path.read_text(encoding="utf-8").splitlines()[0].strip()
+            lines = path.read_text(encoding="utf-8").splitlines()
+            # Skip leading blank lines before finding first content line
+            first_line = next((l.strip() for l in lines if l.strip()), "")
             # Strip leading markdown heading markers
             description = first_line.lstrip("#").strip()
-        except (IndexError, OSError):
+        except (StopIteration, OSError):
             description = f"{name} skill"
         skills.append({"name": name, "description": description, "path": str(path)})
 
@@ -197,6 +200,47 @@ def generate_gemini_md(skills):
     return len(skills)
 
 
+def sync_antigravity_skills(skills):
+    """Sync skills to ~/.gemini/skills/fk:*/SKILL.md for Antigravity.
+
+    Each skill becomes a directory with a SKILL.md file that has
+    YAML frontmatter (name, description) + the original skill content.
+    """
+    ANTIGRAVITY_SKILLS_DIR.mkdir(parents=True, exist_ok=True)
+    count = 0
+    for skill in skills:
+        name = skill["name"]
+        desc = skill["description"]
+        source_path = Path(skill["path"])
+
+        # Read source content
+        try:
+            content = source_path.read_text(encoding="utf-8")
+        except OSError as e:
+            print(f"  SKIP {name}: {e}")
+            continue
+
+        # Create target directory
+        target_dir = ANTIGRAVITY_SKILLS_DIR / f"fk:{name}"
+        target_dir.mkdir(parents=True, exist_ok=True)
+        target_file = target_dir / "SKILL.md"
+
+        # Build SKILL.md with YAML frontmatter
+        skill_content = (
+            f"---\n"
+            f"name: fk:{name}\n"
+            f"description: {desc}\n"
+            f"---\n\n"
+            f"{content}"
+        )
+
+        target_file.write_text(skill_content, encoding="utf-8")
+        count += 1
+
+    print(f"Synced {count} skills to ~/.gemini/skills/")
+    return count
+
+
 def save_state(tools, skill_count):
     state = {
         "tools": tools,
@@ -222,11 +266,14 @@ def run_generators(tools, skills):
         "gemini": generate_gemini,
         "codex": generate_codex,
         "gemini_md": generate_gemini_md,
+        "antigravity": sync_antigravity_skills,
     }
     for tool in tools:
         if tool == "gemini":
             generators["gemini"](skills)
             generators["gemini_md"](skills)
+        elif tool == "antigravity":
+            generators["antigravity"](skills)
         elif tool in generators:
             generators[tool](skills)
 
@@ -238,7 +285,8 @@ def do_interactive(skills):
     print("  [1] Claude Code    (.claude/commands/)")
     print("  [2] Gemini CLI     (.gemini/commands/fk/ + GEMINI.md)")
     print("  [3] Codex CLI      (AGENTS.md)")
-    print("  [4] All of the above")
+    print("  [4] Antigravity    (~/.gemini/skills/)")
+    print("  [5] All of the above")
     print()
 
     raw = input("Select (comma-separated, e.g. 1,2): ").strip()
@@ -246,7 +294,7 @@ def do_interactive(skills):
         print("No selection made. Exiting.")
         return
 
-    mapping = {"1": "claude", "2": "gemini", "3": "codex", "4": "all"}
+    mapping = {"1": "claude", "2": "gemini", "3": "codex", "4": "antigravity", "5": "all"}
     choices = [c.strip() for c in raw.split(",")]
 
     tools = []
@@ -256,7 +304,7 @@ def do_interactive(skills):
             continue
         val = mapping[c]
         if val == "all":
-            tools = ["claude", "gemini", "codex"]
+            tools = ["claude", "gemini", "codex", "antigravity"]
             break
         if val not in tools:
             tools.append(val)
@@ -273,7 +321,7 @@ def do_interactive(skills):
 def do_tool(tool, skills):
     """Non-interactive: generate for a specific tool or all."""
     if tool == "all":
-        tools = ["claude", "gemini", "codex"]
+        tools = ["claude", "gemini", "codex", "antigravity"]
     else:
         tools = [tool]
     run_generators(tools, skills)
@@ -349,7 +397,7 @@ def main():
     )
     parser.add_argument(
         "--tool",
-        choices=["claude", "gemini", "codex", "all"],
+        choices=["claude", "gemini", "codex", "antigravity", "all"],
         help="Generate configs for a specific tool (non-interactive)",
     )
 

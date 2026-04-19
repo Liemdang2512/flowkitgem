@@ -1,3 +1,4 @@
+
 # fk:youtube-upload — Upload Video to YouTube (Shorts + Long-form)
 
 Upload videos to YouTube with channel rule enforcement, auto-scheduling, and batch support.

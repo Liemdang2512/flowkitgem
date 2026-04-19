@@ -1,3 +1,4 @@
+
 Show live GLA status in Claude Code statusline.
 
 Usage: `/fk:dashboard`

@@ -1,3 +1,4 @@
+
 # fk:brand-logo — Apply Channel Branding (Intro + Outro + Logo + 4K Badge)
 
 Full channel branding: prepend intro, append outro, overlay brand logo, and add 4K badge to final video.

@@ -1,3 +1,4 @@
+
 Generate videos for all scenes in a video.
 
 Usage: `/fk:gen-videos <project_id> <video_id>`
