@@ -156,7 +156,14 @@ cd flowkitgem
 python -m agent.main
 ```
 
-### Step 2 — Register skills
+### Step 2 — Load Chrome extension
+
+1. Go to `chrome://extensions` → enable **Developer mode**
+2. Click **Load unpacked** → select the `extension/` folder
+3. Open [labs.google/fx/tools/flow](https://labs.google/fx/tools/flow) and sign in
+4. Verify: `curl http://127.0.0.1:8100/health` → `{"extension_connected":true}`
+
+### Step 3 — Register skills
 
 ```bash
 python setup.py
@@ -172,14 +179,49 @@ Choose which CLI(s) you use:
 [5] All of the above
 ```
 
-That's it. Skills are now available as `/fk:<name>` commands in your chosen CLI.
+Skills are now available as `/fk:<name>` commands in your chosen CLI.
 
-### Step 3 — Load Chrome extension
+---
 
-1. Go to `chrome://extensions` → enable **Developer mode**
-2. Click **Load unpacked** → select the `extension/` folder
-3. Open [labs.google/fx/tools/flow](https://labs.google/fx/tools/flow) and sign in
-4. Verify: `curl http://127.0.0.1:8100/health` → `{"extension_connected":true}`
+## Using with Gemini CLI
+
+Gemini CLI has two modes depending on how you registered skills.
+
+### Mode 1 — Project commands (option 2)
+
+Skills are registered as slash commands **only when Gemini is run inside the `flowkitgem/` directory**:
+
+```bash
+cd flowkitgem
+gemini
+```
+
+Then use `/fk:<name>` directly:
+
+```
+/fk:create-project
+/fk:gen-refs <project_id>
+/fk:gen-images <project_id> <video_id>
+/fk:status <project_id>
+```
+
+How it works: Gemini reads `.gemini/commands/fk/<name>.toml` → follows the instructions in `skills/fk:<name>.md`.
+
+### Mode 2 — Antigravity global skills (option 4)
+
+Skills are copied to `~/.gemini/skills/fk:*/` and work **from any directory** — no need to `cd` into `flowkitgem/`:
+
+```bash
+gemini   # from anywhere
+```
+
+Then use the same `/fk:<name>` commands. Gemini loads the skill from `~/.gemini/skills/fk:<name>/SKILL.md` automatically.
+
+> **Recommended:** Use both options `2,4` so skills work both inside and outside the project folder.
+
+### Context file
+
+When using option 2, Gemini also loads `GEMINI.md` automatically — it contains all critical rules (media ID format, batch API usage, pipeline order) so Gemini follows the same constraints as Claude.
 
 ---
 
