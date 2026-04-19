@@ -57,10 +57,25 @@ OUTPUT FORMAT: Vertical 9:16, portrait orientation, mobile-first framing, tall n
 |------|--------------|------------|
 | `wide shot` of room/landscape | HIGH — triggers 16:9 | Use `medium shot` or `close-up`. Add "tight vertical frame" |
 | `establishing shot` | HIGH | Replace with `overhead shot` or `close vertical establishing frame` |
+| `POV shot` where camera is carried/moving through room | HIGH — AI renders the whole room in landscape | Replace with `medium close-up, locked-off static`. Describe subject leaning into frame instead |
+| `subject walking toward camera from distance` | HIGH — AI places subject far in wide room | Start scene already in frame: "leans forward into frame", "steps into tight close-up" |
+| `camera being placed/set on surface` | HIGH — implies camera sees wide horizontal scene | Remove this action entirely. Start with camera already locked-off |
 | `medium shot` of standing person | LOW | Safe — specify "fills vertical frame from head to mid-thigh" |
 | `close-up` / `medium close-up` | SAFE | Natural portrait framing |
 | `tracking shot` following walking subject | LOW | Specify "camera stays tight on subject, portrait frame" |
 | `overhead top-down shot` | SAFE | Inherently vertical |
+
+**VERTICAL action description rules:**
+
+These action descriptions trigger landscape render regardless of FORMAT declaration:
+
+| Landscape-trigger action | Safe alternative |
+|--------------------------|-----------------|
+| `walking toward the camera` from a distance | `steps into tight close-up` / `leans forward into frame` |
+| `camera being carried through room` | start shot already in position — skip the carrying action |
+| `camera placed on desk` / `set down` | `locked-off static, camera at desk level` — skip placement |
+| `panning across a wide room` | `slow tilt up/down on subject's face` |
+| `wide establishing shot of location` | `tight medium shot, [location] visible as blurred background` |
 
 See **Photorealistic Template** section below for full template with examples.
 
